@@ -43,3 +43,6 @@ function isRectRectColliding(first, second) {
   }
   return false;
 }
+
+const [canvas, ctx] = new2dCanvas("play-area", 800, 500);
+let canvasPosition = canvas.getBoundingClientRect();
