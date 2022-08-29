@@ -64,3 +64,8 @@ window.addEventListener("resize", () => {
 });
 
 canvas.addEventListener("click", () => {});
+
+(function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  requestAnimationFrame(animate);
+})();
