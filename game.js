@@ -67,9 +67,10 @@ window.addEventListener("resize", () => {
 
 canvas.addEventListener("click", (e) => {
   setMousePosition(e);
+  const newMissiles = [];
   for (let i = 0; i < state.cannons.length; i++) {
     const cannon = state.cannons[i];
-    state.missiles.push(
+    newMissiles.push(
       new Missile(cannon.x + cannon.w / 2, cannon.y, {
         x: mouse.x,
         y: mouse.y,
@@ -77,6 +78,8 @@ canvas.addEventListener("click", (e) => {
       })
     );
   }
+  newMissiles.sort((a, b) => a.framesTillHit - b.framesTillHit);
+  state.missiles.push(newMissiles[0]); // only fire from the closest cannon.
 });
 
 class Cannon {
@@ -114,6 +117,7 @@ class Missile {
       x: Math.cos(angle) * speed,
       y: Math.sin(angle) * speed,
     };
+    this.framesTillHit = Math.floor(distance.x / this.velocity.x);
   }
 
   update() {
@@ -123,7 +127,8 @@ class Missile {
       this.x < 0 ||
       this.x + this.w > canvas.width ||
       this.y < 0 ||
-      this.y + this.h > canvas.height
+      this.y + this.h > canvas.height ||
+      this.framesTillHit-- === 0
     )
       this.destroy = true;
   }
