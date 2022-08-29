@@ -65,6 +65,42 @@ window.addEventListener("resize", () => {
 
 canvas.addEventListener("click", () => {});
 
+class Cannon {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.w = cannon.w;
+    this.h = cannon.h;
+  }
+
+  update() {}
+
+  draw() {
+    ctx.fillStyle = "blue";
+    ctx.fillRect(this.x, this.y, this.w, this.h);
+  }
+}
+
+const cannon = { w: 20, h: 20 };
+const cannonIncline = { x: 15, y: 40 };
+const hillW = 60;
+const hillOffset = 30;
+const gapsBetweenCannons =
+  (canvas.width - (2 * hillOffset + 6 * cannonIncline.x + 3 * hillW)) / 2;
+const cannonLocations = [];
+cannonLocations[0] = hillOffset + cannonIncline.x + hillW / 2 - cannon.w / 2;
+const cannonGap = hillW + gapsBetweenCannons + cannonIncline.x * 2;
+cannonLocations[1] = cannonLocations[0] + cannonGap;
+cannonLocations[2] = cannonLocations[1] + cannonGap;
+
+const state = {
+  cannons: [
+    new Cannon(cannonLocations[0], canvas.height - 90),
+    new Cannon(cannonLocations[1], canvas.height - 90),
+    new Cannon(cannonLocations[2], canvas.height - 90),
+  ],
+};
+
 function handleGameArea() {
   const { height } = canvas;
   ctx.strokeStyle = "limegreen";
@@ -74,41 +110,45 @@ function handleGameArea() {
     y: height - 30,
     x: 0,
   };
-  const incline = { x: 15, y: 40 };
-  const main = 60;
-  const ends = 30;
-  const gaps = (canvas.width - (2 * ends + 6 * incline.x + 3 * main)) / 2;
 
   const connect = () => ctx.lineTo(current.x, current.y);
   const strokeHill = () => {
-    current.x += incline.x;
-    current.y -= incline.y;
+    current.x += cannonIncline.x;
+    current.y -= cannonIncline.y;
     connect();
-    current.x += main;
+    current.x += hillW;
     connect();
-    current.x += incline.x;
-    current.y += incline.y;
+    current.x += cannonIncline.x;
+    current.y += cannonIncline.y;
     connect();
   };
   ctx.beginPath();
   ctx.moveTo(current.x, current.y);
-  current.x += ends;
+  current.x += hillOffset;
   connect();
   strokeHill();
-  current.x += gaps;
+  current.x += gapsBetweenCannons;
   connect();
   strokeHill();
-  current.x += gaps;
+  current.x += gapsBetweenCannons;
   connect();
   strokeHill();
-  current.x += ends;
+  current.x += hillOffset;
   connect();
   ctx.stroke();
   ctx.closePath();
 }
 
+function handleCannons() {
+  for (let i = 0; i < state.cannons.length; i++) {
+    state.cannons[i].update();
+    state.cannons[i].draw();
+  }
+}
+
 (function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   handleGameArea();
+  handleCannons();
   requestAnimationFrame(animate);
 })();
