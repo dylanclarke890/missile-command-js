@@ -121,18 +121,19 @@ class Missile {
   draw() {
     ctx.fillStyle = "red";
     ctx.fillRect(this.x, this.y, this.w, this.h);
-    drawText("x", "20px Arial", "pink", this.target.x, this.target.y);
+    // ctx.fillRect(this.target.x, this.target.y, 5, 5);
+    // drawText("x", "20px Arial", "pink", this.target.x, this.target.y);
   }
 }
 
 const cannon = { w: 20, h: 20 };
 const cannonIncline = { x: 15, y: 40 };
 const hillW = 60;
-const hillOffset = 30;
+const endsOffset = 30;
 const gapsBetweenCannons =
-  (canvas.width - (2 * hillOffset + 6 * cannonIncline.x + 3 * hillW)) / 2;
+  (canvas.width - (2 * endsOffset + 6 * cannonIncline.x + 3 * hillW)) / 2;
 const cannonLocations = [];
-cannonLocations[0] = hillOffset + cannonIncline.x + hillW / 2 - cannon.w / 2;
+cannonLocations[0] = endsOffset + cannonIncline.x + hillW / 2 - cannon.w / 2;
 const cannonGap = hillW + gapsBetweenCannons + cannonIncline.x * 2;
 cannonLocations[1] = cannonLocations[0] + cannonGap;
 cannonLocations[2] = cannonLocations[1] + cannonGap;
@@ -146,7 +147,7 @@ const state = {
   missiles: [],
 };
 
-function handleGameArea() {
+function handleGameAreaSetup() {
   const { height } = canvas;
   ctx.strokeStyle = "limegreen";
   ctx.lineWidth = 2.5;
@@ -156,30 +157,30 @@ function handleGameArea() {
     x: 0,
   };
 
-  const connect = () => ctx.lineTo(current.x, current.y);
-  const strokeHill = () => {
+  const connectPoint = () => ctx.lineTo(current.x, current.y);
+  const strokeCannonHill = () => {
     current.x += cannonIncline.x;
     current.y -= cannonIncline.y;
-    connect();
+    connectPoint();
     current.x += hillW;
-    connect();
+    connectPoint();
     current.x += cannonIncline.x;
     current.y += cannonIncline.y;
-    connect();
+    connectPoint();
   };
   ctx.beginPath();
   ctx.moveTo(current.x, current.y);
-  current.x += hillOffset;
-  connect();
-  strokeHill();
+  current.x += endsOffset;
+  connectPoint();
+  strokeCannonHill();
   current.x += gapsBetweenCannons;
-  connect();
-  strokeHill();
+  connectPoint();
+  strokeCannonHill();
   current.x += gapsBetweenCannons;
-  connect();
-  strokeHill();
-  current.x += hillOffset;
-  connect();
+  connectPoint();
+  strokeCannonHill();
+  current.x += endsOffset;
+  connectPoint();
   ctx.stroke();
   ctx.closePath();
 }
@@ -204,7 +205,7 @@ function handleObjectCleanup() {
 
 (function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  handleGameArea();
+  handleGameAreaSetup();
   handleCannons();
   handleMissiles();
   handleObjectCleanup();
