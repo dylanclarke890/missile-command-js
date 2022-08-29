@@ -67,13 +67,7 @@ canvas.addEventListener("click", () => {
   for (let i = 0; i < state.cannons.length; i++) {
     const cannon = state.cannons[i];
     state.missiles.push(
-      new Missile(
-        cannon.x + cannon.w / 2,
-        cannon.y,
-        { x: -4, y: -3 },
-        { x: "L", y: "U" },
-        { x: mouse.x, y: mouse.y }
-      )
+      new Missile(cannon.x + cannon.w / 2, cannon.y, { x: mouse.x, y: mouse.y })
     );
   }
 });
@@ -95,20 +89,29 @@ class Cannon {
 }
 
 class Missile {
-  constructor(x, y, speed, trajectory, target) {
+  constructor(x, y, target) {
     this.x = x;
     this.y = y;
-    this.speed = speed;
-    this.trajectory = trajectory;
     this.w = 10;
     this.h = 30;
     this.target = target;
     this.destroy = false;
+
+    const distance = {
+      x: target.x - x,
+      y: target.y - y,
+    };
+    const angle = Math.atan2(distance.y, distance.x);
+    const speed = settings.levels[currentRun.level].missileSpeed;
+    this.velocity = {
+      x: Math.cos(angle) * speed,
+      y: Math.sin(angle) * speed,
+    };
   }
 
   update() {
-    this.x += this.speed.x;
-    this.y += this.speed.y;
+    this.x += this.velocity.x;
+    this.y += this.velocity.y;
     if (
       this.x < 0 ||
       this.x + this.w > canvas.width ||
@@ -122,7 +125,7 @@ class Missile {
     ctx.fillStyle = "red";
     ctx.fillRect(this.x, this.y, this.w, this.h);
     // ctx.fillRect(this.target.x, this.target.y, 5, 5);
-    // drawText("x", "20px Arial", "pink", this.target.x, this.target.y);
+    drawText("x", "20px Arial", "pink", this.target.x, this.target.y);
   }
 }
 
@@ -138,6 +141,11 @@ const cannonGap = hillW + gapsBetweenCannons + cannonIncline.x * 2;
 cannonLocations[1] = cannonLocations[0] + cannonGap;
 cannonLocations[2] = cannonLocations[1] + cannonGap;
 
+const currentRun = {
+  level: 0,
+  score: 0,
+};
+let currentLevel = 0;
 const state = {
   cannons: [
     new Cannon(cannonLocations[0], canvas.height - 90),
@@ -145,6 +153,10 @@ const state = {
     new Cannon(cannonLocations[2], canvas.height - 90),
   ],
   missiles: [],
+};
+
+const settings = {
+  levels: [{ missileSpeed: 10 }],
 };
 
 function handleGameAreaSetup() {
