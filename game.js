@@ -70,7 +70,11 @@ canvas.addEventListener("click", (e) => {
   for (let i = 0; i < state.cannons.length; i++) {
     const cannon = state.cannons[i];
     state.missiles.push(
-      new Missile(cannon.x + cannon.w / 2, cannon.y, { x: mouse.x, y: mouse.y })
+      new Missile(cannon.x + cannon.w / 2, cannon.y, {
+        x: mouse.x,
+        y: mouse.y,
+        ...settings.target, // h and w
+      })
     );
   }
 });
@@ -96,7 +100,7 @@ class Missile {
     this.x = x;
     this.y = y;
     this.w = 10;
-    this.h = 30;
+    this.h = 10;
     this.target = target;
     this.destroy = false;
 
@@ -127,8 +131,20 @@ class Missile {
   draw() {
     ctx.fillStyle = "red";
     ctx.fillRect(this.x, this.y, this.w, this.h);
-    // ctx.fillRect(this.target.x, this.target.y, 5, 5);
     drawText("x", "20px Arial", "pink", this.target.x, this.target.y);
+    // ctx.fillRect(
+    //   this.target.x - this.target.w / 2,
+    //   this.target.y - this.target.h / 2,
+    //   this.target.w,
+    //   this.target.h
+    // );
+
+    ctx.strokeStyle = "orange";
+    ctx.beginPath();
+    ctx.moveTo(this.x, this.y);
+    ctx.lineTo(this.target.x, this.target.y);
+    ctx.stroke();
+    ctx.closePath();
   }
 }
 
@@ -160,6 +176,10 @@ const state = {
 
 const settings = {
   levels: [{ missileSpeed: 10 }],
+  target: {
+    w: 10,
+    h: 10,
+  },
 };
 
 function handleGameAreaSetup() {
