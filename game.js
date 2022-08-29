@@ -54,16 +54,19 @@ const mouse = {
   h: 0.1,
 };
 
-canvas.addEventListener("mousemove", (e) => {
+const setMousePosition = (e) => {
   mouse.x = e.x - canvasPosition.left;
   mouse.y = e.y - canvasPosition.top;
-});
+};
+
+canvas.addEventListener("mousemove", setMousePosition);
 
 window.addEventListener("resize", () => {
   canvasPosition = canvas.getBoundingClientRect();
 });
 
-canvas.addEventListener("click", () => {
+canvas.addEventListener("click", (e) => {
+  setMousePosition(e);
   for (let i = 0; i < state.cannons.length; i++) {
     const cannon = state.cannons[i];
     state.missiles.push(
