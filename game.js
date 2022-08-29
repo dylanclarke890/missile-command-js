@@ -46,3 +46,21 @@ function isRectRectColliding(first, second) {
 
 const [canvas, ctx] = new2dCanvas("play-area", 800, 500);
 let canvasPosition = canvas.getBoundingClientRect();
+
+const mouse = {
+  x: 0,
+  y: 0,
+  w: 0.1,
+  h: 0.1,
+};
+
+canvas.addEventListener("mousemove", (e) => {
+  mouse.x = e.x - canvasPosition.left;
+  mouse.y = e.y - canvasPosition.top;
+});
+
+window.addEventListener("resize", () => {
+  canvasPosition = canvas.getBoundingClientRect();
+});
+
+canvas.addEventListener("click", () => {});
