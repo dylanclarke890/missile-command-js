@@ -63,7 +63,20 @@ window.addEventListener("resize", () => {
   canvasPosition = canvas.getBoundingClientRect();
 });
 
-canvas.addEventListener("click", () => {});
+canvas.addEventListener("click", () => {
+  for (let i = 0; i < state.cannons.length; i++) {
+    const cannon = state.cannons[i];
+    state.missiles.push(
+      new Missile(
+        cannon.x + cannon.w / 2,
+        cannon.y,
+        { x: -4, y: -3 },
+        { x: "L", y: "U" },
+        { x: mouse.x, y: mouse.y }
+      )
+    );
+  }
+});
 
 class Cannon {
   constructor(x, y) {
@@ -78,6 +91,37 @@ class Cannon {
   draw() {
     ctx.fillStyle = "blue";
     ctx.fillRect(this.x, this.y, this.w, this.h);
+  }
+}
+
+class Missile {
+  constructor(x, y, speed, trajectory, target) {
+    this.x = x;
+    this.y = y;
+    this.speed = speed;
+    this.trajectory = trajectory;
+    this.w = 10;
+    this.h = 30;
+    this.target = target;
+    this.destroy = false;
+  }
+
+  update() {
+    this.x += this.speed.x;
+    this.y += this.speed.y;
+    if (
+      this.x < 0 ||
+      this.x + this.w > canvas.width ||
+      this.y < 0 ||
+      this.y + this.h > canvas.height
+    )
+      this.destroy = true;
+  }
+
+  draw() {
+    ctx.fillStyle = "red";
+    ctx.fillRect(this.x, this.y, this.w, this.h);
+    drawText("x", "20px Arial", "pink", this.target.x, this.target.y);
   }
 }
 
@@ -99,6 +143,7 @@ const state = {
     new Cannon(cannonLocations[1], canvas.height - 90),
     new Cannon(cannonLocations[2], canvas.height - 90),
   ],
+  missiles: [],
 };
 
 function handleGameArea() {
@@ -146,9 +191,22 @@ function handleCannons() {
   }
 }
 
+function handleMissiles() {
+  for (let i = 0; i < state.missiles.length; i++) {
+    state.missiles[i].update();
+    state.missiles[i].draw();
+  }
+}
+
+function handleObjectCleanup() {
+  state.missiles = state.missiles.filter((missile) => !missile.destroy);
+}
+
 (function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   handleGameArea();
   handleCannons();
+  handleMissiles();
+  handleObjectCleanup();
   requestAnimationFrame(animate);
 })();
