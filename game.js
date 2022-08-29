@@ -65,7 +65,50 @@ window.addEventListener("resize", () => {
 
 canvas.addEventListener("click", () => {});
 
+function handleGameArea() {
+  const { height } = canvas;
+  ctx.strokeStyle = "limegreen";
+  ctx.lineWidth = 2.5;
+
+  const current = {
+    y: height - 30,
+    x: 0,
+  };
+  const incline = { x: 15, y: 40 };
+  const main = 60;
+  const ends = 30;
+  const gaps = (canvas.width - (2 * ends + 6 * incline.x + 3 * main)) / 2;
+
+  const connect = () => ctx.lineTo(current.x, current.y);
+  const strokeHill = () => {
+    current.x += incline.x;
+    current.y -= incline.y;
+    connect();
+    current.x += main;
+    connect();
+    current.x += incline.x;
+    current.y += incline.y;
+    connect();
+  };
+  ctx.beginPath();
+  ctx.moveTo(current.x, current.y);
+  current.x += ends;
+  connect();
+  strokeHill();
+  current.x += gaps;
+  connect();
+  strokeHill();
+  current.x += gaps;
+  connect();
+  strokeHill();
+  current.x += ends;
+  connect();
+  ctx.stroke();
+  ctx.closePath();
+}
+
 (function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  handleGameArea();
   requestAnimationFrame(animate);
 })();
