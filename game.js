@@ -131,15 +131,8 @@ class Missile {
   update() {
     this.x += this.velocity.x;
     this.y += this.velocity.y;
-    if (
-      this.x < 0 ||
-      this.x + this.w > canvas.width ||
-      this.y < 0 ||
-      this.y + this.h > canvas.height
-    )
-      this.destroy = true;
 
-    if (this.framesTillHit-- === 0) {
+    if (this.framesTillHit-- <= 0) {
       this.destroy = true;
       state.explosions.push(new Explosion(this.x, this.y));
     }
@@ -187,6 +180,10 @@ class Explosion {
     for (let i = 0; i < state.cannons.length; i++) {
       const cannon = state.cannons[i];
       if (isCircleRectColliding(this, cannon)) cannon.destroy = true;
+    }
+    for (let i = 0; i < state.enemies.current.length; i++) {
+      const enemy = state.enemies.current[i];
+      if (isCircleRectColliding(this, enemy)) enemy.destroy = true;
     }
   }
 
@@ -248,7 +245,7 @@ const state = {
 
 const settings = {
   levels: [
-    { missileSpeed: 5, totalEnemies: 12, enemiesAtOnce: 5, spawnDelay: 10 },
+    { missileSpeed: 1, totalEnemies: 12, enemiesAtOnce: 5, spawnDelay: 10 },
   ],
   target: {
     w: 10,
@@ -330,8 +327,8 @@ function handleEnemyCreation() {
       w: targeted.h,
     };
     const missile = new Missile(x, y, target);
-    console.log(missile);
     state.enemies.current.push(missile);
+    state.enemies.total++;
   }
 }
 
@@ -368,6 +365,7 @@ function handleObjectCleanup() {
   state.missiles = state.missiles.filter(isNotDestroyed);
   state.cannons = state.cannons.filter(isNotDestroyed);
   state.explosions = state.explosions.filter(isNotDestroyed);
+  state.enemies.current = state.enemies.current.filter(isNotDestroyed);
   currentRun.buildings = currentRun.buildings.filter(isNotDestroyed);
 }
 
