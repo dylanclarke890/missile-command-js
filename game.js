@@ -117,7 +117,7 @@ class Missile {
     this.x = x;
     this.y = y;
     this.w = 10;
-    this.h = 10;
+    this.h = 30;
     this.target = target;
     this.destroy = false;
 
@@ -125,10 +125,10 @@ class Missile {
       x: target.x - x,
       y: target.y - y,
     };
-    const angle = Math.atan2(distance.y, distance.x);
+    this.angle = Math.atan2(distance.y, distance.x);
     this.velocity = {
-      x: Math.cos(angle) * speed,
-      y: Math.sin(angle) * speed,
+      x: Math.cos(this.angle) * speed,
+      y: Math.sin(this.angle) * speed,
     };
     this.framesTillHit = Math.abs(Math.floor(distance.x / this.velocity.x));
   }
@@ -144,9 +144,13 @@ class Missile {
   }
 
   draw() {
-    ctx.fillStyle = "red";
-    ctx.fillRect(this.x, this.y, this.w, this.h);
-    drawText("x", "20px Arial", "pink", this.target.x, this.target.y);
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle + 5 / Math.PI); 
+    ctx.fillStyle = "lightgreen";
+    ctx.fillRect(-this.w / 2, -this.h / 2, this.w, this.h);
+    ctx.restore();
+    drawText("x", "20px Arial", "red", this.target.x, this.target.y);
     ctx.strokeStyle = "pink";
     ctx.lineWidth = 1;
     ctx.beginPath();
