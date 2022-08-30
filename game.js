@@ -186,6 +186,22 @@ class Explosion {
   }
 }
 
+class Building {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.w = 50;
+    this.h = 50;
+  }
+
+  update() {}
+
+  draw() {
+    ctx.strokeStyle = "green";
+    ctx.strokeRect(this.x, this.y, this.w, this.h);
+  }
+}
+
 const cannon = { w: 20, h: 20 };
 const cannonIncline = { x: 15, y: 40 };
 const hillW = 60;
@@ -201,6 +217,7 @@ cannonLocations[2] = cannonLocations[1] + cannonGap;
 const currentRun = {
   level: 0,
   score: 0,
+  buildings: [],
 };
 let currentLevel = 0;
 const state = {
@@ -226,6 +243,18 @@ const settings = {
     colors: ["purple", "red", "blue"],
   },
 };
+
+(function initialize() {
+  const y = canvas.height - 80;
+  currentRun.buildings.push(
+    new Building(135, y),
+    new Building(210, y),
+    new Building(285, y),
+    new Building(460, y),
+    new Building(535, y),
+    new Building(610, y)
+  );
+})();
 
 function handleGameAreaSetup() {
   const { height } = canvas;
@@ -286,6 +315,13 @@ function handleExplosions() {
   }
 }
 
+function handleBuildings() {
+  for (let i = 0; i < currentRun.buildings.length; i++) {
+    currentRun.buildings[i].update();
+    currentRun.buildings[i].draw();
+  }
+}
+
 function handleObjectCleanup() {
   state.missiles = state.missiles.filter((missile) => !missile.destroy);
   state.explosions = state.explosions.filter((explosion) => !explosion.destroy);
@@ -294,6 +330,7 @@ function handleObjectCleanup() {
 (function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   handleGameAreaSetup();
+  handleBuildings();
   handleCannons();
   handleMissiles();
   handleExplosions();
