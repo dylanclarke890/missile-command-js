@@ -374,8 +374,6 @@ function handleEnemyCreation() {
 }
 
 function handleObjectDrawing() {
-  handleGameAreaSetup();
-
   for (let i = 0; i < currentRun.buildings.length; i++) {
     currentRun.buildings[i].draw();
   }
@@ -408,6 +406,7 @@ function handleObjectDrawing() {
       state.explosions.push(new Explosion(enemy.x, enemy.y));
     }
   }
+  handleGameAreaSetup();
 }
 
 const isNotDestroyed = (val) => !val.destroy;
