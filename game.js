@@ -262,10 +262,18 @@ const state = {
 const settings = {
   levels: [
     {
-      missileSpeed: { player: 3, enemy: 1 },
+      missileSpeed: { player: 3, enemy: 0.5 },
       totalEnemies: 12,
       enemiesAtOnce: 5,
-      spawnDelay: 10,
+      spawnDelay: 40,
+      scoreMultiplier: 1,
+    },
+    {
+      missileSpeed: { player: 4, enemy: 1 },
+      totalEnemies: 18,
+      enemiesAtOnce: 6,
+      spawnDelay: 35,
+      scoreMultiplier: 2,
     },
   ],
   target: {
@@ -293,7 +301,14 @@ const settings = {
 })();
 
 function handleGameAreaSetup() {
-  const { height } = canvas;
+  const { height, width } = canvas;
+  drawText(
+    `Score: ${currentRun.score}`,
+    "30px Arial",
+    "white",
+    width / 2 - 150,
+    50
+  );
   ctx.strokeStyle = "limegreen";
   ctx.lineWidth = 2.5;
   const current = {
@@ -387,7 +402,11 @@ function handleObjectDrawing() {
     const enemy = state.enemies.current[i];
     enemy.update();
     enemy.draw();
-    if (enemy.destroy) state.explosions.push(new Explosion(enemy.x, enemy.y));
+    if (enemy.destroy) {
+      currentRun.score +=
+        10 * settings.levels[currentRun.level].scoreMultiplier;
+      state.explosions.push(new Explosion(enemy.x, enemy.y));
+    }
   }
 }
 
