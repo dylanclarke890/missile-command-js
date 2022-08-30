@@ -176,6 +176,11 @@ class Explosion {
       this.color++;
     }
     if (this.timer === 50) this.destroy = true;
+
+    for (let i = 0; i < currentRun.buildings.length; i++) {
+      const building = currentRun.buildings[i];
+      if (isCircleRectColliding(this, building)) building.destroy = true;
+    }
   }
 
   draw() {
@@ -183,6 +188,7 @@ class Explosion {
     ctx.fillStyle = settings.explosions.colors[this.color % 3];
     ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
     ctx.fill();
+    ctx.closePath();
   }
 }
 
@@ -192,6 +198,7 @@ class Building {
     this.y = y;
     this.w = 50;
     this.h = 50;
+    this.destroy = false;
   }
 
   update() {}
@@ -325,6 +332,9 @@ function handleBuildings() {
 function handleObjectCleanup() {
   state.missiles = state.missiles.filter((missile) => !missile.destroy);
   state.explosions = state.explosions.filter((explosion) => !explosion.destroy);
+  currentRun.buildings = currentRun.buildings.filter(
+    (building) => !building.destroy
+  );
 }
 
 (function animate() {
