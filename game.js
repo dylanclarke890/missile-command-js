@@ -181,6 +181,16 @@ class Explosion {
       const building = currentRun.buildings[i];
       if (isCircleRectColliding(this, building)) building.destroy = true;
     }
+
+    for (let i = 0; i < state.missiles.length; i++) {
+      const missile = state.missiles[i];
+      if (isCircleRectColliding(this, missile)) missile.destroy = true;
+    }
+
+    for (let i = 0; i < state.cannons.length; i++) {
+      const cannon = state.cannons[i];
+      if (isCircleRectColliding(this, cannon)) cannon.destroy = true;
+    }
   }
 
   draw() {
@@ -329,12 +339,12 @@ function handleBuildings() {
   }
 }
 
+const isNotDestroyed = (val) => !val.destroy;
 function handleObjectCleanup() {
-  state.missiles = state.missiles.filter((missile) => !missile.destroy);
-  state.explosions = state.explosions.filter((explosion) => !explosion.destroy);
-  currentRun.buildings = currentRun.buildings.filter(
-    (building) => !building.destroy
-  );
+  state.missiles = state.missiles.filter(isNotDestroyed);
+  state.cannons = state.cannons.filter(isNotDestroyed);
+  state.explosions = state.explosions.filter(isNotDestroyed);
+  currentRun.buildings = currentRun.buildings.filter(isNotDestroyed);
 }
 
 (function animate() {
