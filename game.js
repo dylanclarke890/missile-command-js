@@ -144,20 +144,20 @@ class Missile {
   }
 
   draw() {
-    ctx.save();
-    ctx.translate(this.x, this.y);
-    ctx.rotate(this.angle + 5 / Math.PI); 
-    ctx.fillStyle = "lightgreen";
-    ctx.fillRect(-this.w / 2, -this.h / 2, this.w, this.h);
-    ctx.restore();
     drawText("x", "20px Arial", "red", this.target.x, this.target.y);
     ctx.strokeStyle = "pink";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(this.x, this.y);
-    ctx.lineTo(this.target.x, this.target.y);
+    ctx.lineTo(this.x - this.velocity.x * 100, this.y - this.velocity.y * 100);
     ctx.stroke();
     ctx.closePath();
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle + 5 / Math.PI);
+    ctx.fillStyle = "lightgreen";
+    ctx.fillRect(-this.w / 2, -this.h / 2, this.w, this.h);
+    ctx.restore();
   }
 }
 
