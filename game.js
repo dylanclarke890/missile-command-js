@@ -144,14 +144,8 @@ class Missile {
     ctx.fillStyle = "red";
     ctx.fillRect(this.x, this.y, this.w, this.h);
     drawText("x", "20px Arial", "pink", this.target.x, this.target.y);
-    // ctx.fillRect(
-    //   this.target.x - this.target.w / 2,
-    //   this.target.y - this.target.h / 2,
-    //   this.target.w,
-    //   this.target.h
-    // );
-
-    ctx.strokeStyle = "orange";
+    ctx.strokeStyle = "pink";
+    ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(this.x, this.y);
     ctx.lineTo(this.target.x, this.target.y);
