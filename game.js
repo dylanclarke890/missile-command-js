@@ -145,11 +145,18 @@ class Missile {
 
   draw() {
     drawText("x", "20px Arial", "red", this.target.x, this.target.y);
-    ctx.strokeStyle = "pink";
+    const lineEnd = {
+      x: this.x - this.velocity.x * 100,
+      y: this.y - this.velocity.y * 100,
+    };
+    const grd = ctx.createLinearGradient(this.x, this.y, lineEnd.x, lineEnd.y);
+    grd.addColorStop(0, "white");
+    grd.addColorStop(1, "transparent");
+    ctx.strokeStyle = grd;
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(this.x, this.y);
-    ctx.lineTo(this.x - this.velocity.x * 100, this.y - this.velocity.y * 100);
+    ctx.lineTo(lineEnd.x, lineEnd.y);
     ctx.stroke();
     ctx.closePath();
     ctx.save();
