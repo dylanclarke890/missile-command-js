@@ -67,19 +67,24 @@ window.addEventListener("resize", () => {
 
 canvas.addEventListener("click", (e) => {
   setMousePosition(e);
-  const newMissiles = [];
+  const ready = [];
   for (let i = 0; i < state.cannons.length; i++) {
     const cannon = state.cannons[i];
-    newMissiles.push(
-      new Missile(cannon.x + cannon.w / 2, cannon.y, {
-        x: mouse.x,
-        y: mouse.y,
-        ...settings.target, // h and w
-      })
-    );
+    if (cannon.shotsLeft <= 0) continue;
+
+    const missile = new Missile(cannon.x + cannon.w / 2, cannon.y, {
+      x: mouse.x,
+      y: mouse.y,
+      ...settings.target, // h and w
+    });
+    ready.push([cannon, missile]);
   }
-  newMissiles.sort((a, b) => a.framesTillHit - b.framesTillHit);
-  state.missiles.push(newMissiles[0]); // only fire from the closest cannon.
+
+  ready.sort((a, b) => a[1].framesTillHit - b[1].framesTillHit);
+
+  const firing = ready[0];
+  firing[0].shotsLeft--;
+  state.missiles.push(firing[1]);
 });
 
 class Cannon {
@@ -88,6 +93,7 @@ class Cannon {
     this.y = y;
     this.w = cannon.w;
     this.h = cannon.h;
+    this.shotsLeft = 10;
   }
 
   update() {}
@@ -95,6 +101,7 @@ class Cannon {
   draw() {
     ctx.fillStyle = "blue";
     ctx.fillRect(this.x, this.y, this.w, this.h);
+    drawText(this.shotsLeft, "30px Arial", "white", this.x - 5, this.y + 70);
   }
 }
 
@@ -180,7 +187,7 @@ const state = {
 };
 
 const settings = {
-  levels: [{ missileSpeed: 10 }],
+  levels: [{ missileSpeed: 5 }],
   target: {
     w: 10,
     h: 10,
