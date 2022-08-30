@@ -125,7 +125,7 @@ class Missile {
       x: Math.cos(angle) * speed,
       y: Math.sin(angle) * speed,
     };
-    this.framesTillHit = Math.floor(distance.x / this.velocity.x);
+    this.framesTillHit = Math.abs(Math.floor(distance.x / this.velocity.x));
   }
 
   update() {
@@ -242,10 +242,14 @@ const state = {
   ],
   missiles: [],
   explosions: [],
+  enemies: { current: [], total: 0 },
+  frame: 0,
 };
 
 const settings = {
-  levels: [{ missileSpeed: 5 }],
+  levels: [
+    { missileSpeed: 5, totalEnemies: 12, enemiesAtOnce: 5, spawnDelay: 10 },
+  ],
   target: {
     w: 10,
     h: 10,
@@ -308,26 +312,54 @@ function handleGameAreaSetup() {
   ctx.closePath();
 }
 
+function handleEnemyCreation() {
+  const { enemiesAtOnce, totalEnemies, spawnDelay } =
+    settings.levels[currentRun.level];
+  const { current, total } = state.enemies;
+  if (current.length === enemiesAtOnce || total === totalEnemies) return;
+  if (state.frame > 0 && state.frame % spawnDelay === 0) {
+    const x = randUpTo(canvas.width);
+    const y = randUpTo(20) * -1;
+    const targeted = [...state.cannons, ...currentRun.buildings][
+      randUpTo(state.cannons.length + currentRun.buildings.length, true)
+    ];
+    const target = {
+      x: targeted.x,
+      y: targeted.y,
+      h: targeted.w,
+      w: targeted.h,
+    };
+    const missile = new Missile(x, y, target);
+    console.log(missile);
+    state.enemies.current.push(missile);
+  }
+}
+
 function handleObjectDrawing() {
   handleGameAreaSetup();
 
   for (let i = 0; i < currentRun.buildings.length; i++) {
     currentRun.buildings[i].draw();
   }
-  
+
   for (let i = 0; i < state.cannons.length; i++) {
     state.cannons[i].update();
     state.cannons[i].draw();
   }
-  
+
   for (let i = 0; i < state.missiles.length; i++) {
     state.missiles[i].update();
     state.missiles[i].draw();
   }
-  
+
   for (let i = 0; i < state.explosions.length; i++) {
     state.explosions[i].update();
     state.explosions[i].draw();
+  }
+
+  for (let i = 0; i < state.enemies.current.length; i++) {
+    state.enemies.current[i].update();
+    state.enemies.current[i].draw();
   }
 }
 
@@ -341,7 +373,9 @@ function handleObjectCleanup() {
 
 (function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  handleEnemyCreation();
   handleObjectDrawing();
   handleObjectCleanup();
+  state.frame++;
   requestAnimationFrame(animate);
 })();
