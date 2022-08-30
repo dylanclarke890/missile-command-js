@@ -83,6 +83,7 @@ canvas.addEventListener("click", (e) => {
   ready.sort((a, b) => a[1].framesTillHit - b[1].framesTillHit);
 
   const firing = ready[0];
+  if (!firing) return;
   firing[0].shotsLeft--;
   state.missiles.push(firing[1]);
 });
@@ -134,10 +135,14 @@ class Missile {
       this.x < 0 ||
       this.x + this.w > canvas.width ||
       this.y < 0 ||
-      this.y + this.h > canvas.height ||
-      this.framesTillHit-- === 0
+      this.y + this.h > canvas.height
     )
       this.destroy = true;
+
+    if (this.framesTillHit-- === 0) {
+      this.destroy = true;
+      state.explosions.push(new Explosion(this.x, this.y));
+    }
   }
 
   draw() {
@@ -151,6 +156,33 @@ class Missile {
     ctx.lineTo(this.target.x, this.target.y);
     ctx.stroke();
     ctx.closePath();
+  }
+}
+
+class Explosion {
+  constructor(x, y) {
+    this.x = x;
+    this.y = y;
+    this.r = 0;
+    this.rMax = settings.explosions.size.max;
+    this.destroy = false;
+    this.timer = 0;
+    this.color = 0;
+  }
+
+  update() {
+    if (this.timer++ % 3 === 0) {
+      this.r = Math.min(this.r + 1, this.rMax);
+      this.color++;
+    }
+    if (this.timer === 50) this.destroy = true;
+  }
+
+  draw() {
+    ctx.beginPath();
+    ctx.fillStyle = settings.explosions.colors[this.color % 3];
+    ctx.arc(this.x, this.y, this.r, 0, 2 * Math.PI);
+    ctx.fill();
   }
 }
 
@@ -178,6 +210,7 @@ const state = {
     new Cannon(cannonLocations[2], canvas.height - 90),
   ],
   missiles: [],
+  explosions: [],
 };
 
 const settings = {
@@ -185,6 +218,12 @@ const settings = {
   target: {
     w: 10,
     h: 10,
+  },
+  explosions: {
+    size: {
+      max: 12,
+    },
+    colors: ["purple", "red", "blue"],
   },
 };
 
@@ -240,8 +279,16 @@ function handleMissiles() {
   }
 }
 
+function handleExplosions() {
+  for (let i = 0; i < state.explosions.length; i++) {
+    state.explosions[i].update();
+    state.explosions[i].draw();
+  }
+}
+
 function handleObjectCleanup() {
   state.missiles = state.missiles.filter((missile) => !missile.destroy);
+  state.explosions = state.explosions.filter((explosion) => !explosion.destroy);
 }
 
 (function animate() {
@@ -249,6 +296,7 @@ function handleObjectCleanup() {
   handleGameAreaSetup();
   handleCannons();
   handleMissiles();
+  handleExplosions();
   handleObjectCleanup();
   requestAnimationFrame(animate);
 })();
