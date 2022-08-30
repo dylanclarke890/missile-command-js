@@ -176,17 +176,14 @@ class Explosion {
       this.color++;
     }
     if (this.timer === 50) this.destroy = true;
-
     for (let i = 0; i < currentRun.buildings.length; i++) {
       const building = currentRun.buildings[i];
       if (isCircleRectColliding(this, building)) building.destroy = true;
     }
-
     for (let i = 0; i < state.missiles.length; i++) {
       const missile = state.missiles[i];
       if (isCircleRectColliding(this, missile)) missile.destroy = true;
     }
-
     for (let i = 0; i < state.cannons.length; i++) {
       const cannon = state.cannons[i];
       if (isCircleRectColliding(this, cannon)) cannon.destroy = true;
@@ -236,7 +233,7 @@ const currentRun = {
   score: 0,
   buildings: [],
 };
-let currentLevel = 0;
+
 const state = {
   cannons: [
     new Cannon(cannonLocations[0], canvas.height - 90),
@@ -277,7 +274,6 @@ function handleGameAreaSetup() {
   const { height } = canvas;
   ctx.strokeStyle = "limegreen";
   ctx.lineWidth = 2.5;
-
   const current = {
     y: height - 30,
     x: 0,
@@ -294,6 +290,7 @@ function handleGameAreaSetup() {
     current.y += cannonIncline.y;
     connectPoint();
   };
+
   ctx.beginPath();
   ctx.moveTo(current.x, current.y);
   current.x += endsOffset;
@@ -311,31 +308,26 @@ function handleGameAreaSetup() {
   ctx.closePath();
 }
 
-function handleCannons() {
+function handleObjectDrawing() {
+  handleGameAreaSetup();
+
+  for (let i = 0; i < currentRun.buildings.length; i++) {
+    currentRun.buildings[i].draw();
+  }
+  
   for (let i = 0; i < state.cannons.length; i++) {
     state.cannons[i].update();
     state.cannons[i].draw();
   }
-}
-
-function handleMissiles() {
+  
   for (let i = 0; i < state.missiles.length; i++) {
     state.missiles[i].update();
     state.missiles[i].draw();
   }
-}
-
-function handleExplosions() {
+  
   for (let i = 0; i < state.explosions.length; i++) {
     state.explosions[i].update();
     state.explosions[i].draw();
-  }
-}
-
-function handleBuildings() {
-  for (let i = 0; i < currentRun.buildings.length; i++) {
-    currentRun.buildings[i].update();
-    currentRun.buildings[i].draw();
   }
 }
 
@@ -349,11 +341,7 @@ function handleObjectCleanup() {
 
 (function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  handleGameAreaSetup();
-  handleBuildings();
-  handleCannons();
-  handleMissiles();
-  handleExplosions();
+  handleObjectDrawing();
   handleObjectCleanup();
   requestAnimationFrame(animate);
 })();
