@@ -68,15 +68,21 @@ window.addEventListener("resize", () => {
 canvas.addEventListener("click", (e) => {
   setMousePosition(e);
   const ready = [];
+  const missileSpeed = settings.levels[currentRun.level].missileSpeed.player;
   for (let i = 0; i < state.cannons.length; i++) {
     const cannon = state.cannons[i];
     if (cannon.shotsLeft <= 0) continue;
 
-    const missile = new Missile(cannon.x + cannon.w / 2, cannon.y, {
-      x: mouse.x,
-      y: mouse.y,
-      ...settings.target, // h and w
-    });
+    const missile = new Missile(
+      cannon.x + cannon.w / 2,
+      cannon.y,
+      {
+        x: mouse.x,
+        y: mouse.y,
+        ...settings.target, // h and w
+      },
+      missileSpeed
+    );
     ready.push([cannon, missile]);
   }
 
@@ -107,7 +113,7 @@ class Cannon {
 }
 
 class Missile {
-  constructor(x, y, target) {
+  constructor(x, y, target, speed) {
     this.x = x;
     this.y = y;
     this.w = 10;
@@ -120,7 +126,6 @@ class Missile {
       y: target.y - y,
     };
     const angle = Math.atan2(distance.y, distance.x);
-    const speed = settings.levels[currentRun.level].missileSpeed;
     this.velocity = {
       x: Math.cos(angle) * speed,
       y: Math.sin(angle) * speed,
@@ -165,7 +170,7 @@ class Explosion {
 
   update() {
     if (this.timer++ % 3 === 0) {
-      this.r = Math.min(this.r + 1, this.rMax);
+      this.r = Math.min(this.r + 3, this.rMax);
       this.color++;
     }
     if (this.timer === 50) this.destroy = true;
@@ -245,7 +250,12 @@ const state = {
 
 const settings = {
   levels: [
-    { missileSpeed: 1, totalEnemies: 12, enemiesAtOnce: 5, spawnDelay: 10 },
+    {
+      missileSpeed: { player: 3, enemy: 1 },
+      totalEnemies: 12,
+      enemiesAtOnce: 5,
+      spawnDelay: 10,
+    },
   ],
   target: {
     w: 10,
@@ -253,7 +263,7 @@ const settings = {
   },
   explosions: {
     size: {
-      max: 12,
+      max: 30,
     },
     colors: ["purple", "red", "blue"],
   },
@@ -326,7 +336,12 @@ function handleEnemyCreation() {
       h: targeted.w,
       w: targeted.h,
     };
-    const missile = new Missile(x, y, target);
+    const missile = new Missile(
+      x,
+      y,
+      target,
+      settings.levels[currentRun.level].missileSpeed.enemy
+    );
     state.enemies.current.push(missile);
     state.enemies.total++;
   }
@@ -344,19 +359,24 @@ function handleObjectDrawing() {
     state.cannons[i].draw();
   }
 
-  for (let i = 0; i < state.missiles.length; i++) {
-    state.missiles[i].update();
-    state.missiles[i].draw();
-  }
-
   for (let i = 0; i < state.explosions.length; i++) {
     state.explosions[i].update();
     state.explosions[i].draw();
   }
 
+  for (let i = 0; i < state.missiles.length; i++) {
+    const missile = state.missiles[i];
+    missile.update();
+    missile.draw();
+    if (missile.destroy)
+      state.explosions.push(new Explosion(missile.x, missile.y));
+  }
+
   for (let i = 0; i < state.enemies.current.length; i++) {
-    state.enemies.current[i].update();
-    state.enemies.current[i].draw();
+    const enemy = state.enemies.current[i];
+    enemy.update();
+    enemy.draw();
+    if (enemy.destroy) state.explosions.push(new Explosion(enemy.x, enemy.y));
   }
 }
 
