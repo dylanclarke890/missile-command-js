@@ -533,7 +533,8 @@ function checkForWin() {
   if (currentRun.buildings.length === 0) state.won = -1;
   else if (
     state.enemies.current.length === 0 &&
-    state.enemies.total === settings.levels[currentRun.level].totalEnemies
+    state.enemies.total === settings.levels[currentRun.level].totalEnemies &&
+    state.explosions.length === 0
   )
     state.won = 1;
 }
@@ -546,12 +547,25 @@ function handleLossScreen() {
     canvas.width / 2 - 100,
     canvas.height / 2 - 150
   );
-
+  drawText(
+    `Score: ${currentRun.score}`,
+    "20px Arial",
+    "white",
+    canvas.width / 2 - 100,
+    canvas.height / 2 - 100
+  );
+  drawText(
+    `Level: ${currentRun.level}`,
+    "20px Arial",
+    "white",
+    canvas.width / 2 + 100,
+    canvas.height / 2 - 100
+  );
   const { x, y, w, h, boxColor, font, fontColor, hover, hoverColor } =
     settings.actionButton;
   ctx.fillStyle = hover ? hoverColor : boxColor;
   ctx.fillRect(x, y, w, h);
-  drawText("Restart", font, fontColor, x + 15, y + 30);
+  drawText("Play Again?", font, fontColor, x + 15, y + 30);
 }
 
 function handleWinScreen() {
