@@ -104,6 +104,17 @@ canvas.addEventListener("click", (e) => {
       break;
     case -1:
       if (!isRectRectColliding(mouse, settings.actionButton)) break;
+      state = { ...defaultState() };
+      currentRun = { level: 0, score: 0, buildings: [] };
+      const y = canvas.height - 80;
+      currentRun.buildings.push(
+        new Building(135, y),
+        new Building(210, y),
+        new Building(285, y),
+        new Building(460, y),
+        new Building(535, y),
+        new Building(610, y)
+      );
       break;
     case 1:
       if (!isRectRectColliding(mouse, settings.actionButton)) break;
@@ -259,13 +270,13 @@ const cannonGap = hillW + gapsBetweenCannons + cannonIncline.x * 2;
 cannonLocations[1] = cannonLocations[0] + cannonGap;
 cannonLocations[2] = cannonLocations[1] + cannonGap;
 
-const currentRun = {
+let currentRun = {
   level: 0,
   score: 0,
   buildings: [],
 };
 
-let state = {
+const defaultState = () => ({
   cannons: [
     new Cannon(cannonLocations[0], canvas.height - 90),
     new Cannon(cannonLocations[1], canvas.height - 90),
@@ -276,7 +287,9 @@ let state = {
   enemies: { current: [], total: 0 },
   frame: 0,
   won: 0, // -1 for loss, 0 for in progress, 1 for win
-};
+});
+
+let state = { ...defaultState() };
 
 const settings = {
   levels: [
@@ -477,6 +490,12 @@ function handleLossScreen() {
     canvas.width / 2,
     canvas.height / 2 - 150
   );
+
+  const { x, y, w, h, boxColor, font, fontColor, hover, hoverColor } =
+    settings.actionButton;
+  ctx.fillStyle = hover ? hoverColor : boxColor;
+  ctx.fillRect(x, y, w, h);
+  drawText("Restart", font, fontColor, x + 15, y + 30);
 }
 
 function handleWinScreen() {
@@ -500,20 +519,8 @@ function nextLevel() {
   currentRun.score += currentRun.buildings.length * buildings * scoreMultiplier;
   for (let i = 0; i < state.cannons.length; i++)
     currentRun.score += state.cannons[i].shotsLeft * ammo * scoreMultiplier;
-
   currentRun.level++;
-  state = {
-    cannons: [
-      new Cannon(cannonLocations[0], canvas.height - 90),
-      new Cannon(cannonLocations[1], canvas.height - 90),
-      new Cannon(cannonLocations[2], canvas.height - 90),
-    ],
-    missiles: [],
-    explosions: [],
-    enemies: { current: [], total: 0 },
-    frame: 0,
-    won: 0, // -1 for loss, 0 for in progress, 1 for win
-  };
+  state = { ...defaultState() };
 }
 
 (function animate() {
