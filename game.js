@@ -468,10 +468,10 @@ function handleEnemyCreation() {
       randUpTo(state.cannons.length + currentRun.buildings.length, true)
     ];
     const target = {
-      x: targeted.x,
-      y: targeted.y,
-      h: targeted.w,
-      w: targeted.h,
+      x: targeted.x + targeted.w / 2 - 6,
+      y: targeted.y + targeted.h,
+      w: targeted.w,
+      h: targeted.h,
     };
     const missile = new Missile(
       x,
