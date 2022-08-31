@@ -55,7 +55,7 @@ const mouse = {
 };
 
 const setMousePosition = (e) => {
-  mouse.x = e.x - canvasPosition.left;
+  mouse.x = e.x - (canvasPosition.left + 6);
   mouse.y = e.y - canvasPosition.top;
 };
 
@@ -286,7 +286,7 @@ const defaultState = () => ({
   explosions: [],
   enemies: { current: [], total: 0 },
   frame: 0,
-  won: -1, // -1 for loss, 0 for in progress, 1 for win
+  won: 0, // -1 for loss, 0 for in progress, 1 for win
 });
 
 let state = { ...defaultState() };
