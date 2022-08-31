@@ -59,7 +59,13 @@ const setMousePosition = (e) => {
   mouse.y = e.y - canvasPosition.top;
 };
 
-canvas.addEventListener("mousemove", setMousePosition);
+canvas.addEventListener("mousemove", (e) => {
+  setMousePosition(e);
+  settings.actionButton.hover = isRectRectColliding(
+    mouse,
+    settings.actionButton
+  );
+});
 
 window.addEventListener("resize", () => {
   canvasPosition = canvas.getBoundingClientRect();
@@ -67,31 +73,43 @@ window.addEventListener("resize", () => {
 
 canvas.addEventListener("click", (e) => {
   setMousePosition(e);
-  const ready = [];
-  const missileSpeed = settings.levels[currentRun.level].missileSpeed.player;
-  for (let i = 0; i < state.cannons.length; i++) {
-    const cannon = state.cannons[i];
-    if (cannon.shotsLeft <= 0) continue;
+  switch (state.won) {
+    case 0:
+      const ready = [];
+      const missileSpeed =
+        settings.levels[currentRun.level].missileSpeed.player;
+      for (let i = 0; i < state.cannons.length; i++) {
+        const cannon = state.cannons[i];
+        if (cannon.shotsLeft <= 0) continue;
 
-    const missile = new Missile(
-      cannon.x + cannon.w / 2,
-      cannon.y,
-      {
-        x: mouse.x,
-        y: mouse.y,
-        ...settings.target, // h and w
-      },
-      missileSpeed
-    );
-    ready.push([cannon, missile]);
+        const missile = new Missile(
+          cannon.x + cannon.w / 2,
+          cannon.y,
+          {
+            x: mouse.x,
+            y: mouse.y,
+            ...settings.target, // h and w
+          },
+          missileSpeed
+        );
+        ready.push([cannon, missile]);
+      }
+
+      ready.sort((a, b) => a[1].framesTillHit - b[1].framesTillHit);
+
+      const firing = ready[0];
+      if (!firing) return;
+      firing[0].shotsLeft--;
+      state.missiles.push(firing[1]);
+      break;
+    case -1:
+      if (!isRectRectColliding(mouse, settings.actionButton)) break;
+      break;
+    case 1:
+      if (!isRectRectColliding(mouse, settings.actionButton)) break;
+      nextLevel();
+      break;
   }
-
-  ready.sort((a, b) => a[1].framesTillHit - b[1].framesTillHit);
-
-  const firing = ready[0];
-  if (!firing) return;
-  firing[0].shotsLeft--;
-  state.missiles.push(firing[1]);
 });
 
 class Cannon {
@@ -247,7 +265,7 @@ const currentRun = {
   buildings: [],
 };
 
-const state = {
+let state = {
   cannons: [
     new Cannon(cannonLocations[0], canvas.height - 90),
     new Cannon(cannonLocations[1], canvas.height - 90),
@@ -257,6 +275,7 @@ const state = {
   explosions: [],
   enemies: { current: [], total: 0 },
   frame: 0,
+  won: 0, // -1 for loss, 0 for in progress, 1 for win
 };
 
 const settings = {
@@ -286,6 +305,21 @@ const settings = {
     },
     colors: ["purple", "red", "blue"],
   },
+  actionButton: {
+    w: 120,
+    h: 40,
+    x: canvas.width / 2 - 50,
+    y: canvas.height / 2 - 50,
+    font: "20px Arial",
+    fontColor: "white",
+    boxColor: "blue",
+    hover: false,
+    hoverColor: "lightblue",
+  },
+  points: {
+    buildings: 100,
+    ammo: 50,
+  },
 };
 
 (function initialize() {
@@ -307,6 +341,14 @@ function handleGameAreaSetup() {
     "30px Arial",
     "white",
     width / 2 - 150,
+    50
+  );
+
+  drawText(
+    `x${settings.levels[currentRun.level].scoreMultiplier}`,
+    "30px Arial",
+    "white",
+    width / 2 + 150,
     50
   );
   ctx.strokeStyle = "limegreen";
@@ -418,11 +460,73 @@ function handleObjectCleanup() {
   currentRun.buildings = currentRun.buildings.filter(isNotDestroyed);
 }
 
+function checkForWin() {
+  if (currentRun.buildings.length === 0) state.won = -1;
+  else if (
+    state.enemies.current.length === 0 &&
+    state.enemies.total === settings.levels[currentRun.level].totalEnemies
+  )
+    state.won = 1;
+}
+
+function handleLossScreen() {
+  drawText(
+    "Game Over",
+    "40px Arial",
+    "white",
+    canvas.width / 2,
+    canvas.height / 2 - 150
+  );
+}
+
+function handleWinScreen() {
+  drawText(
+    "Level Won",
+    "40px Arial",
+    "white",
+    canvas.width / 2 - 100,
+    canvas.height / 2 - 150
+  );
+  const { x, y, w, h, boxColor, font, fontColor, hover, hoverColor } =
+    settings.actionButton;
+  ctx.fillStyle = hover ? hoverColor : boxColor;
+  ctx.fillRect(x, y, w, h);
+  drawText("Next Level", font, fontColor, x + 15, y + 30);
+}
+
+function nextLevel() {
+  const scoreMultiplier = settings.levels[currentRun.level].scoreMultiplier;
+  const { buildings, ammo } = settings.points;
+  currentRun.score += currentRun.buildings.length * buildings * scoreMultiplier;
+  for (let i = 0; i < state.cannons.length; i++)
+    currentRun.score += state.cannons[i].shotsLeft * ammo * scoreMultiplier;
+
+  currentRun.level++;
+  state = {
+    cannons: [
+      new Cannon(cannonLocations[0], canvas.height - 90),
+      new Cannon(cannonLocations[1], canvas.height - 90),
+      new Cannon(cannonLocations[2], canvas.height - 90),
+    ],
+    missiles: [],
+    explosions: [],
+    enemies: { current: [], total: 0 },
+    frame: 0,
+    won: 0, // -1 for loss, 0 for in progress, 1 for win
+  };
+}
+
 (function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  handleEnemyCreation();
-  handleObjectDrawing();
-  handleObjectCleanup();
+  const winState = state.won;
+  if (winState === -1) handleLossScreen();
+  else if (winState === 1) handleWinScreen();
+  else {
+    handleEnemyCreation();
+    handleObjectDrawing();
+    handleObjectCleanup();
+    checkForWin();
+  }
   state.frame++;
   requestAnimationFrame(animate);
 })();
