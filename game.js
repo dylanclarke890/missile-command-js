@@ -565,7 +565,7 @@ function handleLossScreen() {
     settings.actionButton;
   ctx.fillStyle = hover ? hoverColor : boxColor;
   ctx.fillRect(x, y, w, h);
-  drawText("Play Again?", font, fontColor, x + 15, y + 30);
+  drawText("Play Again?", font, fontColor, x + 10, y + 30);
 }
 
 function handleWinScreen() {
@@ -584,7 +584,7 @@ function handleWinScreen() {
   );
   const centerOffset = -100;
   drawText(
-    "Bonuses:",
+    "Bonus Score:",
     "30px Arial",
     "white",
     canvas.width / 2 + centerOffset,
