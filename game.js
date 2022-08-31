@@ -555,7 +555,7 @@ function handleLossScreen() {
     canvas.height / 2 - 100
   );
   drawText(
-    `Level: ${currentRun.level}`,
+    `Level: ${currentRun.level + 1}`,
     "20px Arial",
     "white",
     canvas.width / 2 + 100,
