@@ -286,7 +286,7 @@ const defaultState = () => ({
   explosions: [],
   enemies: { current: [], total: 0 },
   frame: 0,
-  won: 0, // -1 for loss, 0 for in progress, 1 for win
+  won: -1, // -1 for loss, 0 for in progress, 1 for win
 });
 
 let state = { ...defaultState() };
@@ -377,8 +377,8 @@ const settings = {
   actionButton: {
     w: 120,
     h: 40,
-    x: canvas.width / 2 - 50,
-    y: canvas.height / 2 - 50,
+    x: canvas.width / 2 - 60,
+    y: canvas.height / 2,
     font: "20px Arial",
     fontColor: "white",
     boxColor: "blue",
@@ -574,8 +574,39 @@ function handleWinScreen() {
     "40px Arial",
     "white",
     canvas.width / 2 - 100,
+    canvas.height / 2 - 200
+  );
+  const scoreMultiplier = settings.levels[currentRun.level].scoreMultiplier;
+  const { buildings, ammo } = settings.points;
+  const ammoLeft = state.cannons.reduce(
+    (sum, value) => sum + value.shotsLeft,
+    0
+  );
+  const centerOffset = -100;
+  drawText(
+    "Bonuses:",
+    "30px Arial",
+    "white",
+    canvas.width / 2 + centerOffset,
     canvas.height / 2 - 150
   );
+  drawText(
+    `Ammo: ${ammoLeft} * ${scoreMultiplier * ammo}`,
+    "20px Arial",
+    "white",
+    canvas.width / 2 + centerOffset,
+    canvas.height / 2 - 100
+  );
+  drawText(
+    `Buildings: ${currentRun.buildings.length} * ${
+      scoreMultiplier * buildings
+    }`,
+    "20px Arial",
+    "white",
+    canvas.width / 2 + centerOffset,
+    canvas.height / 2 - 50
+  );
+
   const { x, y, w, h, boxColor, font, fontColor, hover, hoverColor } =
     settings.actionButton;
   ctx.fillStyle = hover ? hoverColor : boxColor;
